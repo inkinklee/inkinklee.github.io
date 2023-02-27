@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.2">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.18.5">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://gcore.jsdelivr.net'>
+  <link rel="preconnect" href="https://gcore.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  
+  <title>腾讯云 Serverless + Github Action 自动部署 Hexo 博客 - INKLEE</title>
+
+  
+    <meta name="description" content="看过很多使用 Github Action 自动部署 Hexo 博客的教程，但是部署到 腾讯云 Serverless framework 的几乎没有，而且对于 GitHub 身份验证也比较麻烦，综合各家之长有了本篇小文，力求详细。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="腾讯云 Serverless + Github Action 自动部署 Hexo 博客">
+<meta property="og:url" content="https://blog.inklee.top/2021-08-30/%E8%85%BE%E8%AE%AF%E4%BA%91-Serverless-Github-Action-%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2-Hexo-%E5%8D%9A%E5%AE%A2/">
+<meta property="og:site_name" content="INKLEE">
+<meta property="og:description" content="看过很多使用 Github Action 自动部署 Hexo 博客的教程，但是部署到 腾讯云 Serverless framework 的几乎没有，而且对于 GitHub 身份验证也比较麻烦，综合各家之长有了本篇小文，力求详细。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.hermitlsr.top/images/post/github-action/20210830171716.png!watermark">
+<meta property="og:image" content="https://cdn.hermitlsr.top/images/post/github-action/20210830173247.png!watermark">
+<meta property="og:image" content="https://cdn.hermitlsr.top/images/post/github-action/20210830173526.png!watermark">
+<meta property="og:image" content="https://cdn.hermitlsr.top/images/post/github-action/20210830175723.png!watermark">
+<meta property="article:published_time" content="2021-08-30T14:08:17.000Z">
+<meta property="article:modified_time" content="2023-02-27T13:37:10.698Z">
+<meta property="article:author" content="inklee">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="Github Action">
+<meta property="article:tag" content="tencent cloud">
+<meta property="article:tag" content="Severless">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cdn.hermitlsr.top/images/post/github-action/20210830171716.png!watermark">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="https://cdn.hermitlsr.top/images/web/rick32.png">
+  
+
+  
+
+  
+    <link rel="stylesheet" href="https://gcore.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css" integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+    <script defer src="https://gcore.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js" integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+    <script defer src="https://gcore.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"onload="renderMathInElement(document.body);"></script>
+  
+
+
+  
+    
+      <link rel="preconnect" href="https://s1.hdslb.com/" />
+    
+      <link rel="stylesheet" href="//s1.hdslb.com/bfs/static/jinkela/long/font/regular.css" media="all" onload="this.media='all'" />
+    
+      <link rel="stylesheet" href="//s1.hdslb.com/bfs/static/jinkela/long/font/medium.css" media="all" onload="this.media='all'" />
+    
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+  
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://cdn.hermitlsr.top/images/web/rickavatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.4/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">INKLEE</div><div class="sub normal cap">道阻且长，行则将至</div><div class="sub hover cap" style="opacity:0"> blog.inklee.top</div></a></div>
+
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/wiki/">项目</a><a class="nav-item" href="/notes/">便笺</a><a class="nav-item" href="/about/">更多</a></nav>
+</header>
+
+
+<div class="widgets">
+<widget class="widget-wrapper search"><div class="widget-body"><div class="search-wrapper" id="search"><form class="search-form"><input type="text" class="search-input" id="search-input" data-filter="/blog/" placeholder="文章搜索"><svg t="1670596976048" class="icon search-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2676" width="200" height="200"><path d="M938.2 832.6L723.8 618.1c-2.5-2.5-5.3-4.4-7.9-6.4 36.2-55.6 57.3-121.8 57.3-193.1C773.3 222.8 614.6 64 418.7 64S64 222.8 64 418.6c0 195.9 158.8 354.6 354.6 354.6 71.3 0 137.5-21.2 193.2-57.4 2 2.7 3.9 5.4 6.3 7.8L832.5 938c14.6 14.6 33.7 21.9 52.8 21.9 19.1 0 38.2-7.3 52.8-21.8 29.2-29.1 29.2-76.4 0.1-105.5M418.7 661.3C284.9 661.3 176 552.4 176 418.6 176 284.9 284.9 176 418.7 176c133.8 0 242.6 108.9 242.6 242.7 0 133.7-108.9 242.6-242.6 242.6" p-id="2677"></path></svg></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div></div></widget>
+
+
+<widget class="widget-wrapper toc single" id="data-toc"><div class="widget-header cap dis-select"><span class="name">腾讯云 Serverless + Github Action 自动部署 Hexo 博客</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-github-action"><span class="toc-text"> 1 Github Action</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2"><span class="toc-text"> 2 自动部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-%E5%8D%9A%E5%AE%A2%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86"><span class="toc-text"> 2.1 博客文件管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-%E7%94%9F%E6%88%90%E6%9D%83%E9%99%90%E5%AF%86%E7%A0%81"><span class="toc-text"> 2.2 生成权限密码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-%E9%85%8D%E7%BD%AE-secret"><span class="toc-text"> 2.3 配置 secret</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#24-%E9%85%8D%E7%BD%AE-workflows"><span class="toc-text"> 2.4 配置 workflows</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#241-%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6"><span class="toc-text"> 2.4.1 触发条件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#242-%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-text"> 2.4.2 工作流</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="toc-text"> 创建运行环境</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A3%80%E5%87%BA%E4%BB%93%E5%BA%93%E6%96%87%E4%BB%B6"><span class="toc-text"> 检出仓库文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-node-%E5%92%8C-%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96"><span class="toc-text"> 安装 node 和 相关依赖</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E7%BD%91%E9%A1%B5%E6%96%87%E4%BB%B6"><span class="toc-text"> 生成网页文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2%E5%88%B0%E8%85%BE%E8%AE%AF%E4%BA%91"><span class="toc-text"> 部署到腾讯云</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2%E5%88%B0-github-page"><span class="toc-text"> 部署到 Github page</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#qmsg-%E9%85%B1%E6%8E%A8%E9%80%81%E6%88%90%E5%8A%9F%E4%BF%A1%E6%81%AF"><span class="toc-text"> qmsg 酱推送成功信息</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9C%80%E5%90%8E%E4%B8%80%E4%BA%9B%E5%B8%B8%E7%94%A8%E7%9A%84-action-%E8%8E%B7%E5%8F%96"><span class="toc-text"> 3 最后一些常用的 action 获取</span></a></li></ol></div></div></widget>
+</div>
+
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+    
+
+
+
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">INKLEE</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%8D%9A%E5%AE%A2%E6%8A%98%E8%85%BE/">博客折腾</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-08-30T14:08:17.000Z">2021-08-30</time></div></div>
+
+<article class='md-text content post'>
+<h1 class="article-title"><span>腾讯云 Serverless + Github Action 自动部署 Hexo 博客</span></h1>
+<p>   看过很多使用 Github Action 自动部署 Hexo 博客的教程，但是部署到 腾讯云 Serverless framework 的几乎没有，而且对于 GitHub 身份验证也比较麻烦，综合各家之长有了本篇小文，力求详细。</p>
+<span id="more"></span>
+<h2 id="1-github-action"><a class="markdownIt-Anchor" href="#1-github-action"></a> 1 Github Action</h2>
+<details class="tag-plugin folding" color="gray"><summary><span>Github Action 是什么</span></summary><div class="body"><p><a target="_blank" rel="noopener" href="https://docs.github.com/cn/actions">官方文档</a><br /><a target="_blank" rel="noopener" href="https://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html">入门教程——阮一峰</a></p></div></details>
+<h2 id="2-自动部署"><a class="markdownIt-Anchor" href="#2-自动部署"></a> 2 自动部署</h2>
+<p>设置步骤：</p>
+<ol>
+<li>博客文件管理</li>
+<li>生成权限密码</li>
+<li>配置 secret</li>
+<li>配置 workflows</li>
+</ol>
+<h3 id="21-博客文件管理"><a class="markdownIt-Anchor" href="#21-博客文件管理"></a> 2.1 博客文件管理</h3>
+<p>博客文件的版本管理是通过使用 GitHub 仓库来实现，基本步骤如下：</p>
+<p>在命令行中：</p>
+<ol>
+<li>在需要的位置通过 <code>hexo init blog</code> 初始化博客环境。</li>
+<li>使用 <code>git init</code> 命令初始化 Git 仓库，此时仓库内没有文件。</li>
+<li>使用 <code>git add .</code> 命令添加所有文件到 Git 仓库中。可以在 <code>.gitignore</code> 文件中设置忽略的文件，此文件中标明的文件不会被加入仓库中。注意此时还没有把这个更改加入到版本库。<details class="tag-plugin folding" color="gray" child="codeblock"><summary><span>我的 .gitignore 文件</span></summary><div class="body"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.DS_Store</span><br><span class="line">Thumbs.db</span><br><span class="line">db.json</span><br><span class="line">*.log</span><br><span class="line">node_modules/</span><br><span class="line">public/</span><br><span class="line">.deploy*/</span><br><span class="line">.idea</span><br></pre></td></tr></table></figure></div></details>
+</li>
+<li>使用 <code>git submodule add https://github.com/#yourname#/#theme.git themes/#themename</code> 命令添加主题文件子模块。主题文件将会作为子模块存在，<code>git push</code> 父模块时只会上传引用的子模块版本。<br />
+例如我使用的是 stellar 主题，相应的命令为 <code>git submodule add https://github.com/hermitlsr/hexo-theme-stellar.git themes/stellar</code> 。执行完成后会在根站点出现 <code>.gitmodules</code> ，它记录了子模块的原仓库地址和本地相对地址。</li>
+</ol>
+<p>注意以上关于 git 的操作可能会因为网络的问题报错 一般是 <mark class="tag-plugin mark" color="red">10054 错误</mark>，很正常，网络 ok 了就行。<br />
+此时，父模块还没有被 push 到 GitHub 上，子模块是和原仓库地址对应的。</p>
+<p>由于我不太熟悉 命令行 管理 git 仓库，所以后面的操作在 GitHub Desktop ( <a target="_blank" rel="noopener" href="https://desktop.github.com/">点我下载</a> )中完成：<br />
+只需要登录自己的 GitHub 账号即可进行版本管理操作：</p>
+<ol>
+<li>添加本地仓库到 <mark class="tag-plugin mark" color="blue">GitHub Desktop</mark>：使用快捷键 <code>ctrl O</code>，或者在菜单中找到 add。然后选取你 <code>git init</code> 操作的那个文件夹即可。</li>
+<li>将更改添加到版本中，在 <mark class="tag-plugin mark" color="blue">Current repository</mark> 下找到你添加的仓库，文件名应该是你本地的文件名。<details class="tag-plugin folding" color="gray"><summary><span>详情图片</span></summary><div class="body"><div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.hermitlsr.top/images/post/github-action/20210830171716.png!watermark" fancybox="true"/></div></div></div></details>
+把 <mark class="tag-plugin mark" color="blue">Changes</mark> 的内容全选，在下方的 <code>commit</code> 的标题部分填入 <code>first commit</code> 点击 <mark class="tag-plugin mark" color="blue">commit</mark> 按钮推送到版本库中。<br />
+推送成功后可以在 <mark class="tag-plugin mark" color="blue">History</mark> 中看到历史版本。但注意到此时更新的版本里有向上的箭头，表明该版本还没有提交到 GitHub 仓库中。</li>
+<li>提交到 Github 仓库：点击上方的 <mark class="tag-plugin mark" color="blue">Publish repository</mark>，勾选 <mark class="tag-plugin mark" color="blue">Keep this code private</mark>，发布到私有仓库，毕竟源文件中可能会涉及到各种隐私文件。<details class="tag-plugin folding" color="gray"><summary><span>详情图片</span></summary><div class="body"><div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.hermitlsr.top/images/post/github-action/20210830173247.png!watermark" fancybox="true"/></div></div><div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.hermitlsr.top/images/post/github-action/20210830173526.png!watermark" fancybox="true"/></div></div></div></details>
+该过程可能会因为网络原因失败，但是重复推送即可。</li>
+</ol>
+<p>此时博客文件管理已经完成，以后如有修改文件，只需在 <mark class="tag-plugin mark" color="blue">GitHub Desktop</mark> 中添加对应版本并推送上去即可。有时使用客户端推送会失败，也可以在命令行中使用 <code>git push</code> 命令。</p>
+<h3 id="22-生成权限密码"><a class="markdownIt-Anchor" href="#22-生成权限密码"></a> 2.2 生成权限密码</h3>
+<p>在使用 Github Action 时需要配置权限密码，一是 Github 的访问令牌，二是 腾讯云的 API密钥管理，三是 qmsg 酱的访问密匙。</p>
+<ol>
+<li>Github 的访问令牌<br />
+<a target="_blank" rel="noopener" href="https://docs.github.com/cn/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token">官方文档——创建个人访问令牌</a></li>
+<li>腾讯云的 API密钥管理<br />
+<a target="_blank" rel="noopener" href="https://console.cloud.tencent.com/cam/capi">点这里创建</a></li>
+<li>qmsg 酱的访问密匙<br />
+<a target="_blank" rel="noopener" href="https://qmsg.zendee.cn/me.html">点这里获取</a></li>
+</ol>
+<p>注意，这些的访问权限都比较高，建议定期设置失效更新。</p>
+<h3 id="23-配置-secret"><a class="markdownIt-Anchor" href="#23-配置-secret"></a> 2.3 配置 secret</h3>
+<p>将 <a target="_blank" rel="noopener" href="https://www.hermitlsr.top/2021-08-30/b387ac98.html#%E7%94%9F%E6%88%90%E6%9D%83%E9%99%90%E5%AF%86%E7%A0%81">生成权限密码</a> 中取得的密码配置到 Github 仓库的 secret 中：<br />
+在仓库的 Setting.Secrets.Actions 中设置</p>
+<details class="tag-plugin folding" color="gray"><summary><span>详情图片</span></summary><div class="body"><div class="tag-plugin image"><div class="image-bg"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.hermitlsr.top/images/post/github-action/20210830175723.png!watermark" fancybox="true"/></div></div></div></details>
+<p>注意：这里的命名要和下面设置的 workflows 中的变量对应。</p>
+<h3 id="24-配置-workflows"><a class="markdownIt-Anchor" href="#24-配置-workflows"></a> 2.4 配置 workflows</h3>
+<p>在根目录的 <code>.github</code> 文件夹中新建 <code>workflows</code> 文件夹，这是存放 Github Action 配置的文件夹，在该文件夹中新建一个 <code>.yml</code> 文件，命名随意。</p>
+<p>我的 workflow 源码：</p>
+<details class="tag-plugin folding" color="gray" child="codeblock"><summary><span>workflow 源码</span></summary><div class="body"><figure class="highlight yml"><figcaption><span>.github/workflows/deploy.yml</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">www.hermitlsr.top</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">master</span>  <span class="comment"># 触发事件</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span> <span class="comment"># 运行环境为最新版 Ubuntu</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">auto</span> <span class="string">deploy</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v2</span></span><br><span class="line">        <span class="attr">with:</span> <span class="comment"># 条件</span></span><br><span class="line">          <span class="attr">submodules:</span> <span class="literal">true</span> <span class="comment"># Checkout private submodules(themes or something else). 当有子模块时切换分支？</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span> <span class="number">16.</span><span class="string">x</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@master</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&quot;16.x&quot;</span> <span class="comment"># node 版本设置</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Cache</span> <span class="string">node</span> <span class="string">modules</span></span><br><span class="line">        <span class="comment"># 设置包缓存目录，避免每次下载</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/cache@v1</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">path:</span> <span class="string">~/.npm</span></span><br><span class="line">          <span class="attr">key:</span> <span class="string">$&#123;&#123;</span> <span class="string">runner.os</span> <span class="string">&#125;&#125;-node-$&#123;&#123;</span> <span class="string">hashFiles(&#x27;**/package-lock.json&#x27;)</span> <span class="string">&#125;&#125;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">dependencies</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">          npm install -g serverless</span></span><br><span class="line"><span class="string">          npm install hexo-cli -g</span></span><br><span class="line"><span class="string">          npm install</span></span><br><span class="line"><span class="string"></span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">init</span> <span class="string">public</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">          hexo clean</span></span><br><span class="line"><span class="string">          hexo generate</span></span><br><span class="line"><span class="string"></span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">tecent</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">          <span class="attr">SERVERLESS_PLATFORM_VENDOR:</span> <span class="string">tencent</span> <span class="comment"># 外网环境下需要设置</span></span><br><span class="line">          <span class="attr">TENCENT_SECRET_ID:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.TENCENT_SECRET_ID</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">TENCENT_SECRET_KEY:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.TENCENT_SECRET_KEY</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">          sls deploy -debug</span></span><br><span class="line"><span class="string"></span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">personal_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.ACCESS_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">external_repository:</span> <span class="string">hermitlsr/hermitlsr.github.io</span></span><br><span class="line">          <span class="attr">publish_branch:</span> <span class="string">master</span></span><br><span class="line">          <span class="attr">publish_dir:</span> <span class="string">./public</span></span><br><span class="line">          <span class="attr">commit_message:</span> <span class="string">$&#123;&#123;</span> <span class="string">github.event.head_commit.message</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">user_name:</span> <span class="string">&#x27;github-actions[bot]&#x27;</span></span><br><span class="line">          <span class="attr">user_email:</span> <span class="string">&#x27;github-actions[bot]@users.noreply.github.com&#x27;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">notification</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span> <span class="comment"># 部署成功后通过 qmsg 推送到 qq 提示部署成功</span></span><br><span class="line">          <span class="string">curl</span> <span class="string">https://qmsg.zendee.cn/send/$&#123;&#123;secrets.QMSG_KEY&#125;&#125;</span> <span class="string">-X</span> <span class="string">POST</span> <span class="string">-d</span> <span class="string">&#x27;msg=部署成功, 请访问 https://www.hermitlsr.top/ 进行确认 &#x27;</span></span><br></pre></td></tr></table></figure></div></details>
+<p>代码主要分两部分，一是触发条件，二是工作流。</p>
+<h4 id="241-触发条件"><a class="markdownIt-Anchor" href="#241-触发条件"></a> 2.4.1 触发条件</h4>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">master</span>  <span class="comment"># 触发事件</span></span><br></pre></td></tr></table></figure>
+<p>该代码表面仓库的 master 有更新时触发 Github Action。</p>
+<h4 id="242-工作流"><a class="markdownIt-Anchor" href="#242-工作流"></a> 2.4.2 工作流</h4>
+<h5 id="创建运行环境"><a class="markdownIt-Anchor" href="#创建运行环境"></a> 创建运行环境</h5>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span> <span class="comment"># 运行环境为最新版 Ubuntu</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">auto</span> <span class="string">deploy</span></span><br><span class="line">    <span class="attr">steps:</span></span><br></pre></td></tr></table></figure>
+<p>后面的具体工作按 <code>steps</code> 中的顺序执行。</p>
+<h5 id="检出仓库文件"><a class="markdownIt-Anchor" href="#检出仓库文件"></a> 检出仓库文件</h5>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Checkout</span></span><br><span class="line">  <span class="attr">uses:</span> <span class="string">actions/checkout@v2</span></span><br><span class="line">  <span class="attr">with:</span> <span class="comment"># 条件</span></span><br><span class="line">    <span class="attr">submodules:</span> <span class="literal">true</span> <span class="comment"># Checkout private submodules(themes or something else). 当有子模块时切换分支？</span></span><br></pre></td></tr></table></figure>
+<p>这里除了检出本仓库中的文件，还会检出子仓库中的文件，当子仓库为私有仓库时会失败，需要额外配置权限。</p>
+<h5 id="安装-node-和-相关依赖"><a class="markdownIt-Anchor" href="#安装-node-和-相关依赖"></a> 安装 node 和 相关依赖</h5>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span> <span class="number">16.</span><span class="string">x</span></span><br><span class="line">  <span class="attr">uses:</span> <span class="string">actions/setup-node@master</span></span><br><span class="line">  <span class="attr">with:</span></span><br><span class="line">    <span class="attr">node-version:</span> <span class="string">&quot;16.x&quot;</span> <span class="comment"># node 版本设置</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Cache</span> <span class="string">node</span> <span class="string">modules</span></span><br><span class="line">  <span class="comment"># 设置包缓存目录，避免每次下载</span></span><br><span class="line">  <span class="attr">uses:</span> <span class="string">actions/cache@v1</span></span><br><span class="line">  <span class="attr">with:</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">~/.npm</span></span><br><span class="line">    <span class="attr">key:</span> <span class="string">$&#123;&#123;</span> <span class="string">runner.os</span> <span class="string">&#125;&#125;-node-$&#123;&#123;</span> <span class="string">hashFiles(&#x27;**/package-lock.json&#x27;)</span> <span class="string">&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">dependencies</span></span><br><span class="line">  <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    npm install -g serverless</span></span><br><span class="line"><span class="string">    npm install hexo-cli -g</span></span><br><span class="line"><span class="string">    npm install</span></span><br></pre></td></tr></table></figure>
+<p>我这里使用了最新的 “16.x” 版本，并设置了缓存目录，避免每次重复安装。</p>
+<p><code>npm install -g serverless</code> 是安装 <code>serverless</code> 用于使用 <code>serverless framework</code> 部署到腾讯云。</p>
+<h5 id="生成网页文件"><a class="markdownIt-Anchor" href="#生成网页文件"></a> 生成网页文件</h5>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">init</span> <span class="string">public</span></span><br><span class="line">  <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    hexo clean</span></span><br><span class="line"><span class="string">    hexo generate</span></span><br></pre></td></tr></table></figure>
+<p>生成 public 文件夹。后续也发布 Github 仓库 时不会使用 <code>hexo deploy</code> ，而是直接将该生成文件推送到目标仓库中，或者使用另一个第三方工具。</p>
+<h5 id="部署到腾讯云"><a class="markdownIt-Anchor" href="#部署到腾讯云"></a> 部署到腾讯云</h5>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">tecent</span></span><br><span class="line">  <span class="attr">env:</span></span><br><span class="line">    <span class="attr">SERVERLESS_PLATFORM_VENDOR:</span> <span class="string">tencent</span> <span class="comment"># 外网环境下需要设置</span></span><br><span class="line">    <span class="attr">TENCENT_SECRET_ID:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.TENCENT_SECRET_ID</span> <span class="string">&#125;&#125;</span></span><br><span class="line">    <span class="attr">TENCENT_SECRET_KEY:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.TENCENT_SECRET_KEY</span> <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">    <span class="string">sls</span> <span class="string">deploy</span> <span class="string">-debug</span></span><br></pre></td></tr></table></figure>
+<p><code>SERVERLESS_PLATFORM_VENDOR: tencent</code> 一定要设置，不设置的话会显示登录失败，这个是来自于腾讯云的技术顾问。<br />
+<code>TENCENT_SECRET_ID</code> 和 <code>TENCENT_SECRET_KEY</code> 都是前面设置的腾讯云的 API 访问令牌。注意变量名。本身在本地使用的时候会创建 <code>.env</code> 文件存放令牌，但这里为了防止令牌泄露，采用 <code>secret</code> 的形式，<code>.env</code> 文件无需上传。<br />
+<code>sls deploy -debug</code> 这个命令用于将生成好的文件推送到腾讯云上，不熟悉该命令的可以看 <a target="_blank" rel="noopener" href="https://www.hermitlsr.top/2021-08-24/2a44b50c.html">腾讯云serverless托管Hexo静态博客</a> 。</p>
+<h5 id="部署到-github-page"><a class="markdownIt-Anchor" href="#部署到-github-page"></a> 部署到 Github page</h5>
+<p>这里有多种方法进行，我选取了两种使用令牌的方法放在这里：</p>
+<p>第一种方法：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">github</span></span><br><span class="line">  <span class="attr">env:</span></span><br><span class="line">    <span class="attr">DEPLOY_REPO:</span> <span class="string">github.com/hermitlsr/hermitlsr.github.io</span></span><br><span class="line">  <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    cd ./public &amp;&amp; git init &amp;&amp; git add .</span></span><br><span class="line"><span class="string">    git config --global user.name $GIT_USER</span></span><br><span class="line"><span class="string">    git config --global user.email $GIT_EMAIL</span></span><br><span class="line"><span class="string">    git add .</span></span><br><span class="line"><span class="string">    git commit -m &quot;GitHub Actions Auto Builder at $(date +&#x27;%Y-%m-%d %H:%M:%S&#x27;)&quot;</span></span><br><span class="line"><span class="string">    git push --force --quiet &quot;https://$&#123;&#123; secrets.ACCESS_TOKEN &#125;&#125;@$DEPLOY_REPO&quot; master:master</span></span><br></pre></td></tr></table></figure>
+<p>该部署方式是直接将生成的 public 文件夹推送到目标仓库的方式。<br />
+<code>DEPLOY_REPO</code> 设置目标仓库。<br />
+首先进入到 <code>public</code> 文件夹中，并初始化 github 仓库，并设置所有者为自己，然后设置推送命令，最后通过访问令牌的验证方式强制推送。该种方式会强制覆盖仓库内的内容。</p>
+<p>另一种推送到 Github 的方式是使用 <code>peaceiris/actions-gh-pages@v3</code></p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">to</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line">  <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v3</span></span><br><span class="line">  <span class="attr">with:</span></span><br><span class="line">    <span class="attr">personal_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.ACCESS_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">    <span class="attr">external_repository:</span> <span class="string">hermitlsr/hermitlsr.github.io</span></span><br><span class="line">    <span class="attr">publish_branch:</span> <span class="string">master</span></span><br><span class="line">    <span class="attr">publish_dir:</span> <span class="string">./public</span></span><br><span class="line">    <span class="attr">commit_message:</span> <span class="string">$&#123;&#123;</span> <span class="string">github.event.head_commit.message</span> <span class="string">&#125;&#125;</span></span><br><span class="line">    <span class="attr">user_name:</span> <span class="string">&#x27;github-actions[bot]&#x27;</span></span><br><span class="line">    <span class="attr">user_email:</span> <span class="string">&#x27;github-actions[bot]@users.noreply.github.com&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>注意：</p>
+<ul>
+<li><code>personal_token: $&#123;&#123; secrets.ACCESS_TOKEN &#125;&#125;</code> ：这里如果是推送到相同的仓库，可以直接使用 <code>github_token:$&#123;&#123; secrets.GITHUB_TOKEN &#125;&#125;</code>，该 token 无需额外生成；当如果是不同的仓库，需要使用 <code>personal_token</code> ，<code>Protocol</code> 为 <code>HTTPS</code> 或者 <code>deploy_key</code> ，<code>Protocol</code> 为 <code>SSH</code> 进行部署。</li>
+<li><code>external_repository</code>： 推送的仓库，设置为你要使用 Github Pages 的仓库就可以了。</li>
+<li><code>publish_branch</code>：要推送到目标仓库的分支，非默认分支需提前创建。</li>
+<li><code>publish_dir</code>：推送内容所在的文件相对地址。</li>
+<li><code>commit_message</code>：推送信息。</li>
+<li>具体可 <a target="_blank" rel="noopener" href="https://github.com/peaceiris/actions-gh-pages">见文档</a> 。</li>
+</ul>
+<h5 id="qmsg-酱推送成功信息"><a class="markdownIt-Anchor" href="#qmsg-酱推送成功信息"></a> qmsg 酱推送成功信息</h5>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">notification</span></span><br><span class="line">  <span class="attr">run:</span> <span class="string">|</span> <span class="comment"># 部署成功后通过 qmsg 推送到 qq 提示部署成功</span></span><br><span class="line">    <span class="string">curl</span> <span class="string">https://qmsg.zendee.cn/send/$&#123;&#123;secrets.QMSG_KEY&#125;&#125;</span> <span class="string">-X</span> <span class="string">POST</span> <span class="string">-d</span> <span class="string">&#x27;msg=部署成功, 请访问 https://www.hermitlsr.top/ 进行确认 &#x27;</span></span><br></pre></td></tr></table></figure>
+<p>该信息可以自定义，这里的 <code>&#123;&#123;secrets.QMSG_KEY&#125;&#125;</code> 为之前设置的 qmsg 的权限密码。这不是一个必要的流程，只是为了让之前注册的 qmsg 酱不要闲置。</p>
+<p>至此配置完成，将所有修改推送到 Github 即可。</p>
+<div class="tag-plugin grid" ><div class="cell" index="0"></div></div>
+<h2 id="3-最后一些常用的-action-获取"><a class="markdownIt-Anchor" href="#3-最后一些常用的-action-获取"></a> 3 最后一些常用的 action 获取</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/actions">GitHub 官方的 action</a><br />
+<a target="_blank" rel="noopener" href="https://github.com/marketplace?type=actions">GitHub 官方市场中的 action</a><br />
+<a target="_blank" rel="noopener" href="https://github.com/sdras/awesome-actions">第三方收集的有用的 action</a></p>
+
+
+<div class="article-footer reveal fs14"><section id="references"><div class="header"><span>参考资料</span></div><div class="body"><ul><li class="post-title"><a href="https://zhuanlan.zhihu.com/p/161969042" target="_blank" rel="external nofollow noopener noreferrer">使用 GitHub Actions 自动部署 Hexo 博客到 GitHub Pages</a></li><li class="post-title"><a href="https://www.cayzlh.com/post/20210515/#GitHub-Actions" target="_blank" rel="external nofollow noopener noreferrer">Github Aciton</a></li><li class="post-title"><a href="https://sanonz.github.io/2020/deploy-a-hexo-blog-from-github-actions/" target="_blank" rel="external nofollow noopener noreferrer">利用 Github Actions 自动部署 Hexo 博客</a></li><li class="post-title"><a href="https://github.com/xaoxuu/xaoxuu.github.io/blob/main/.github/workflows/auto-deploy.yml" target="_blank" rel="external nofollow noopener noreferrer">xaoxuu's autodeploy.yml</a></li></ul></div></section><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>未经允许，禁止转载</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2021-08-30/%E5%AF%85%E5%93%A5%E5%84%BF/">寅哥儿</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2021-08-24/%E8%85%BE%E8%AE%AF%E4%BA%91serverless%E6%89%98%E7%AE%A1Hexo%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2/">腾讯云 Serverless 托管 Hexo 静态博客</a></div></section></div>
+
+
+
+
+
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="sitemap"><div class="sitemap-group"><span class="fs14">博客</span><a href="/">近期</a><a href="/blog/categories/">分类</a><a href="/blog/tags/">标签</a><a href="/blog/archives/">归档</a></div><div class="sitemap-group"><span class="fs14">智库</span><a href="/wiki/tags/%E7%AC%94%E8%AE%B0/">笔记</a></div><div class="sitemap-group"><span class="fs14">社交</span><a href="/friends/">友链</a></div><div class="sitemap-group"><span class="fs14">更多</span><a href="/about/">关于本站</a><a target="_blank" rel="noopener" href="https://github.com/inkinklee">GitHub</a></div></div><div class="text"><p>本站由 <a href="/">@anonymity</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar">Stellar</a> 主题创建。<br />
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  const stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = stellar.config.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.version = '1.18.5';
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.18.5';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+    root : '/',
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://gcore.jsdelivr.net/npm/jquery@3.6.2/dist/jquery.min.js'
+  };
+
+  if ('local_search') {
+    stellar.search = {};
+    stellar.search.service = 'local_search';
+    if (stellar.search.service == 'local_search') {
+      let service_obj = Object.assign({}, {"field":"all","path":"/search.json","content":true,"sort":"-date"});
+      stellar.search[stellar.search.service] = service_obj;
+    }
+  }
+
+  // stellar js
+  stellar.plugins.stellar = Object.assign({"sites":"/js/plugins/sites.js","friends":"/js/plugins/friends.js","ghinfo":"/js/plugins/ghinfo.js","timeline":"/js/plugins/timeline.js","linkcard":"/js/plugins/linkcard.js","fcircle":"/js/plugins/fcircle.js","weibo":"/js/plugins/weibo.js"});
+
+  stellar.plugins.marked = Object.assign("https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js");
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://gcore.jsdelivr.net/npm/vanilla-lazyload@17.8.3/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@8.4.5/swiper-bundle.min.css","js":"https://unpkg.com/swiper@8.4.5/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://gcore.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://gcore.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://gcore.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://gcore.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://gcore.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti@0.9.2/umd/heti.min.css","js":"https://unpkg.com/heti@0.9.2/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" type="text/javascript"></script>
+  
+
+
+  </div>
+</body>
+</html>

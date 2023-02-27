@@ -1,0 +1,15 @@
+User-Agent: *
+DisAllow: /sitemap.xml
+DisAllow: /atom.xml
+DisAllow: /page-sitemap.xml
+DisAllow: /post-sitemap.xml
+DisAllow: /blog/
+DisAllow: /notes/
+DisAllow: /wiki/
+
+
+Disallow: /css
+Disallow: /js
+Disallow: /blog
+
+Disallow: /404.html

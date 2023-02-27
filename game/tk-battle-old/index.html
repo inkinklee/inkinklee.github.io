@@ -1,0 +1,96 @@
+
+<script language="JavaScript">
+    //禁止页面选择以及鼠标右键
+    document.οncοntextmenu=function(){return false;};
+    document.onselectstart=function(){return false;};
+    let h = window.innerHeight;
+    let w = window.innerWidth;
+
+    //禁用右键
+    document.oncontextmenu = function () { return false; };
+
+    //在本网页的任何键盘敲击事件都是无效操作 （防止F12和shift+ctrl+i调起开发者工具）
+    window.onkeydown = window.onkeyup = window.onkeypress = function () {
+        window.event.returnValue = false;
+        return false;
+    }
+
+    //禁用开发者工具F12
+    document.onkeydown = function () {
+        if (window.event && window.event.keyCode == 123) {
+            event.keyCode = 0;
+            event.returnValue = false;
+            return false;
+        }
+    };
+
+    // //如果用户在工具栏调起开发者工具，那么判断浏览器的可视高度和可视宽度是否有改变，如有改变则关闭本页面
+    // window.onresize = function () {
+    //     if (h != window.innerHeight || w != window.innerWidth) {
+    //         window.close();
+    //         window.location = "about:blank";
+    //     }
+    // }
+    </script>
+
+
+
+<!DOCTYPE html>
+<html lang="zh" class="no-js demo-1">
+	<head>
+	  <title>坦克大战</title>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/Helper.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/keyboard.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/const2.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/level.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/crackAnimation.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/prop.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/bullet.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/tank.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/num.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/menu.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/map.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/Collision.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/stage.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/hermitlsr/CDN-for-hermitlsr.top/game/tk-battle-old/main.js"></script>
+		<style type="text/css">
+			#canvasDiv canvas{
+	position:absolute;
+	left: 572px;
+	top: 187px;
+	width: 878px;
+	height: 672px;
+			}
+		body {
+	background-color: #000000;
+}
+body,td,th {
+	color: #FFFFFF;
+}
+</style>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>
+	<body>
+	    <div align="center">
+		<div class="container">
+		    <head><h3>&nbsp;</h3>
+		    <h3>&nbsp;</h3>
+
+		    </head>
+			<div class="main clearfix">
+				<div id="canvasDiv" >
+					<canvas id="wallCanvas" ></canvas> 
+					<canvas id="tankCanvas" ></canvas>
+					<canvas id="grassCanvas" ></canvas>
+					<canvas id="overCanvas" ></canvas> 
+					<canvas id="stageCanvas" ></canvas>
+				</div>
+			</div>
+		</div>
+		</div><!-- /container -->	
+		<a href='/game/' >返回列表</a>
+	</body>
+</html>
